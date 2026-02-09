@@ -1,5 +1,13 @@
 import pool from '../db/pool.js';
 
+/** Normalize fiscal year to single year (e.g. "2025-2026" -> "2025"). */
+function normalizeFiscalYear(value) {
+  if (value == null || value === '') return '';
+  const s = String(value).trim();
+  const m = s.match(/^(\d{4})/);
+  return m ? m[1] : s;
+}
+
 function rowToRecord(row) {
   return {
     id: row.id,
@@ -7,7 +15,7 @@ function rowToRecord(row) {
     lastName: row.last_name ?? '',
     title: row.title ?? '',
     department: row.department ?? '',
-    fiscalYear: row.fiscal_year ?? '',
+    fiscalYear: normalizeFiscalYear(row.fiscal_year),
     yearKey: row.year_key,
     campus: row.campus ?? '',
     campusId: row.campus_id,
