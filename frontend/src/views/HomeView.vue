@@ -310,14 +310,9 @@ function submitDepartment() {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto;
   gap: 1.25rem;
-}
-
-@media (max-width: 560px) {
-  .summary-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .summary-block {
@@ -336,12 +331,25 @@ function submitDepartment() {
 }
 
 .summary-block-title {
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   margin-bottom: 1rem;
-  color: var(--color-accent);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  padding-bottom: 0.5rem;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.summary-block-title::before {
+  content: '';
+  width: 3px;
+  height: 1em;
+  background: linear-gradient(180deg, var(--color-highlight) 0%, var(--color-accent) 100%);
+  border-radius: 2px;
+  flex-shrink: 0;
 }
 
 .summary-list {
@@ -359,6 +367,7 @@ function submitDepartment() {
   margin: 0 -0.75rem;
   border-radius: 6px;
   transition: background 0.15s ease;
+  flex-wrap: wrap;
 }
 
 .summary-list li:hover {
@@ -379,11 +388,10 @@ function submitDepartment() {
   text-align: left;
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   font-weight: 500;
   transition: color 0.15s ease;
+  word-break: break-word;
+  white-space: normal;
 }
 
 .summary-link:hover {

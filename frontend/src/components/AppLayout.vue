@@ -10,6 +10,7 @@ function toggleTheme() {
   try {
     localStorage.setItem('um-salary-theme', dark.value ? 'dark' : 'light')
   } catch (_) {}
+  window.dispatchEvent(new CustomEvent('theme-change'))
 }
 
 onMounted(() => {

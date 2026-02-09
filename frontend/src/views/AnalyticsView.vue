@@ -13,10 +13,35 @@ import {
 
 Chart.register(...registerables)
 
-const CHART_COLORS = {
-  navy: 'rgba(15, 39, 68, 0.9)',
-  navyLight: 'rgba(30, 58, 95, 0.6)',
+const CHART_COLORS_LIGHT = {
+  bar: 'rgba(15, 39, 68, 0.9)',
+  barFill: 'rgba(30, 58, 95, 0.6)',
   border: 'rgba(30, 58, 95, 0.2)',
+  line: 'rgba(30, 58, 95, 0.9)',
+  lineFill: 'rgba(30, 58, 95, 0.1)',
+  secondary: 'rgba(91, 141, 201, 0.9)',
+  secondaryFill: 'rgba(91, 141, 201, 0.5)',
+}
+const CHART_COLORS_DARK = {
+  bar: 'rgba(91, 141, 201, 0.95)',
+  barFill: 'rgba(91, 141, 201, 0.5)',
+  border: 'rgba(148, 163, 184, 0.4)',
+  line: 'rgba(123, 163, 212, 0.95)',
+  lineFill: 'rgba(91, 141, 201, 0.15)',
+  secondary: 'rgba(148, 163, 184, 0.9)',
+  secondaryFill: 'rgba(148, 163, 184, 0.4)',
+}
+
+function isDarkMode(): boolean {
+  return document.documentElement.getAttribute('data-theme') === 'dark'
+}
+
+function chartScaleDefaults() {
+  const dark = isDarkMode()
+  const tickColor = dark ? '#94a3b8' : '#64748b'
+  const gridColor = dark ? 'rgba(248, 250, 252, 0.08)' : 'rgba(15, 39, 68, 0.08)'
+  const titleColor = dark ? '#cbd5e1' : '#475569'
+  return { tickColor, gridColor, titleColor }
 }
 
 const router = useRouter()
@@ -28,6 +53,7 @@ const error = ref('')
 const data = ref<AnalyticsResponse | null>(null)
 
 const chartRefs = { histogram: null as Chart | null, topEarners: null as Chart | null, deptPie: null as Chart | null, campus: null as Chart | null, concentration: null as Chart | null, professorSalaries: null as Chart | null }
+const isDark = ref(false)
 
 async function loadYears() {
   years.value = await api.getYears()
@@ -67,12 +93,21 @@ function buildCharts() {
   const d = data.value
   if (!d) return
 
+  const dark = isDarkMode()
+  const colors = dark ? CHART_COLORS_DARK : CHART_COLORS_LIGHT
+  const scale = chartScaleDefaults()
+
   chartRefs.histogram?.destroy()
   chartRefs.topEarners?.destroy()
   chartRefs.deptPie?.destroy()
   chartRefs.campus?.destroy()
   chartRefs.concentration?.destroy()
   chartRefs.professorSalaries?.destroy()
+
+  const scaleOptions = {
+    x: { ticks: { color: scale.tickColor }, grid: { color: scale.gridColor } },
+    y: { ticks: { color: scale.tickColor }, grid: { color: scale.gridColor }, beginAtZero: true as const },
+  }
 
   if (d.histogram?.length) {
     const ctx = (document.getElementById('chart-histogram') as HTMLCanvasElement)?.getContext('2d')
@@ -81,9 +116,9 @@ function buildCharts() {
         type: 'bar',
         data: {
           labels: d.histogram.map((h) => h.label),
-          datasets: [{ label: 'Count', data: d.histogram.map((h) => h.count), backgroundColor: CHART_COLORS.navyLight, borderColor: CHART_COLORS.navy, borderWidth: 1 }],
+          datasets: [{ label: 'Count', data: d.histogram.map((h) => h.count), backgroundColor: colors.barFill, borderColor: colors.bar, borderWidth: 1 }],
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: scaleOptions.x, y: scaleOptions.y } },
       })
   }
 
@@ -94,23 +129,36 @@ function buildCharts() {
         type: 'bar',
         data: {
           labels: d.topEarners.map((r) => `${r.lastName}, ${r.firstName}`),
-          datasets: [{ label: 'FTR', data: d.topEarners.map((r) => r.ftr), backgroundColor: CHART_COLORS.navyLight, borderColor: CHART_COLORS.navy, borderWidth: 1 }],
+          datasets: [{ label: 'FTR', data: d.topEarners.map((r) => r.ftr), backgroundColor: colors.barFill, borderColor: colors.bar, borderWidth: 1 }],
         },
-        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { callback: (v) => '$' + (Number(v) / 1e6).toFixed(1) + 'M' } } } },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false, labels: { color: scale.tickColor } } },
+          scales: {
+            x: { ...scaleOptions.x, beginAtZero: true, ticks: { ...scaleOptions.x.ticks, callback: (v: unknown) => '$' + (Number(v) / 1e6).toFixed(1) + 'M' } },
+            y: { ...scaleOptions.y, ticks: { color: scale.tickColor }, grid: { drawOnChartArea: false } },
+          },
+        },
       })
   }
 
   if (d.departments?.length) {
     const ctx = (document.getElementById('chart-dept-pie') as HTMLCanvasElement)?.getContext('2d')
-    if (ctx)
+    if (ctx) {
+      const pieColors = dark
+        ? d.departments.map((_, i) => `hsla(215, 50%, ${55 + i * 2}%, 0.9)`)
+        : d.departments.map((_, i) => `hsl(215, 60%, ${45 - i * 2}%)`)
       chartRefs.deptPie = new Chart(ctx, {
         type: 'doughnut',
         data: {
           labels: d.departments.map((x) => x.name),
-          datasets: [{ data: d.departments.map((x) => x.totalFtr), backgroundColor: d.departments.map((_, i) => `hsl(215, 60%, ${45 - i * 2}%)`), borderWidth: 1 }],
+          datasets: [{ data: d.departments.map((x) => x.totalFtr), backgroundColor: pieColors, borderColor: dark ? 'rgba(30, 58, 95, 0.4)' : 'rgba(255,255,255,0.6)', borderWidth: 1 }],
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: scale.tickColor } } } },
       })
+    }
   }
 
   if (d.campus?.length) {
@@ -121,11 +169,20 @@ function buildCharts() {
         data: {
           labels: d.campus.map((c) => c.name.replace('UM_', '')),
           datasets: [
-            { label: 'Headcount', data: d.campus.map((c) => c.count), backgroundColor: CHART_COLORS.navyLight, borderColor: CHART_COLORS.navy, borderWidth: 1, yAxisID: 'y' },
-            { label: 'Payroll ($M)', data: d.campus.map((c) => c.totalFtr / 1e6), backgroundColor: 'rgba(91, 141, 201, 0.5)', borderColor: 'rgba(91, 141, 201, 0.9)', borderWidth: 1, yAxisID: 'y1' },
+            { label: 'Headcount', data: d.campus.map((c) => c.count), backgroundColor: colors.barFill, borderColor: colors.bar, borderWidth: 1, yAxisID: 'y' },
+            { label: 'Payroll ($M)', data: d.campus.map((c) => c.totalFtr / 1e6), backgroundColor: colors.secondaryFill, borderColor: colors.secondary, borderWidth: 1, yAxisID: 'y1' },
           ],
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true } }, scales: { y: { type: 'linear', position: 'left', beginAtZero: true }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: (v) => '$' + v + 'M' } } } },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: true, labels: { color: scale.tickColor } } },
+          scales: {
+            x: scaleOptions.x,
+            y: { ...scaleOptions.y, type: 'linear', position: 'left' },
+            y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { color: scale.tickColor, callback: (v: unknown) => '$' + v + 'M' } },
+          },
+        },
       })
   }
 
@@ -136,9 +193,17 @@ function buildCharts() {
         type: 'line',
         data: {
           labels: d.concentration.map((c) => c.pctEmployees + '%'),
-          datasets: [{ label: 'Cumulative payroll %', data: d.concentration.map((c) => c.pctPayroll), borderColor: CHART_COLORS.navy, backgroundColor: 'rgba(30, 58, 95, 0.1)', fill: true, tension: 0.3 }],
+          datasets: [{ label: 'Cumulative payroll %', data: d.concentration.map((c) => c.pctPayroll), borderColor: colors.line, backgroundColor: colors.lineFill, fill: true, tension: 0.3 }],
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: '% of employees (low to high salary)' } }, y: { min: 0, max: 100, ticks: { callback: (v) => v + '%' } } } },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ...scaleOptions.x, title: { display: true, text: '% of employees (low to high salary)', color: scale.titleColor } },
+            y: { ...scaleOptions.y, min: 0, max: 100, ticks: { ...scaleOptions.y.ticks, callback: (v: unknown) => v + '%' } },
+          },
+        },
       })
   }
 
@@ -149,9 +214,18 @@ function buildCharts() {
         type: 'bar',
         data: {
           labels: d.professorSalaries.map((p) => p.department),
-          datasets: [{ label: 'Avg professor salary', data: d.professorSalaries.map((p) => p.avgFtr), backgroundColor: CHART_COLORS.navyLight, borderColor: CHART_COLORS.navy, borderWidth: 1 }],
+          datasets: [{ label: 'Avg professor salary', data: d.professorSalaries.map((p) => p.avgFtr), backgroundColor: colors.barFill, borderColor: colors.bar, borderWidth: 1 }],
         },
-        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { callback: (v) => '$' + (Number(v) / 1000).toFixed(0) + 'k' } } } },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ...scaleOptions.x, beginAtZero: true, ticks: { ...scaleOptions.x.ticks, callback: (v: unknown) => '$' + (Number(v) / 1000).toFixed(0) + 'k' } },
+            y: { ...scaleOptions.y, grid: { drawOnChartArea: false } },
+          },
+        },
       })
   }
 }
@@ -176,9 +250,16 @@ const heatmapData = computed(() => {
   return { depts, bands: BANDS, matrix, maxCount }
 })
 
+function onThemeChange() {
+  isDark.value = isDarkMode()
+  if (data.value) setTimeout(buildCharts, 50)
+}
+
 onMounted(async () => {
+  isDark.value = isDarkMode()
   await loadYears()
   load()
+  window.addEventListener('theme-change', onThemeChange)
 })
 
 watch(selectedYear, () => {
@@ -194,6 +275,7 @@ watch(
 )
 
 onBeforeUnmount(() => {
+  window.removeEventListener('theme-change', onThemeChange)
   Object.values(chartRefs).forEach((c) => c?.destroy())
 })
 </script>
@@ -324,7 +406,7 @@ onBeforeUnmount(() => {
                       :key="j"
                       class="heatmap-cell"
                       :class="{ 'heatmap-cell-empty': !count }"
-                      :style="count ? { backgroundColor: `rgba(30, 58, 95, ${0.15 + (count / heatmapData.maxCount) * 0.75})`, color: count / heatmapData.maxCount > 0.5 ? '#f8fafc' : 'inherit' } : undefined"
+                      :style="count ? { backgroundColor: isDark ? `rgba(91, 141, 201, ${0.2 + (count / heatmapData.maxCount) * 0.6})` : `rgba(30, 58, 95, ${0.15 + (count / heatmapData.maxCount) * 0.75})`, color: (isDark || count / heatmapData.maxCount > 0.5) ? '#f8fafc' : 'inherit' } : undefined"
                     >
                       {{ count || '—' }}
                     </td>
