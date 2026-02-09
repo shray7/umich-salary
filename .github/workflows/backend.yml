@@ -91,7 +91,7 @@ jobs:
       - name: Build and push backend image
         run: |
           IMAGE="$ACR_NAME.azurecr.io/umich-salary-backend:latest"
-          docker build --platform linux/amd64 -t "$IMAGE" ./backend
+          docker build --platform linux/amd64 -t "$IMAGE" "$GITHUB_WORKSPACE/backend"
           docker push "$IMAGE"
 
       - name: Update Container App (East)
