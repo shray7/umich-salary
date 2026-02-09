@@ -100,29 +100,37 @@ jobs:
           ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS }}
         run: |
           RG="${RESOURCE_GROUP:-rg-umich-salary}"
-          EXTRA=""
           if [ -n "$ALLOWED_ORIGINS" ]; then
-            EXTRA="--set-env-vars 'ALLOWED_ORIGINS=$ALLOWED_ORIGINS'"
+            az containerapp update \
+              --name $CA_APP_EAST \
+              --resource-group "$RG" \
+              --image $ACR_NAME.azurecr.io/umich-salary-backend:latest \
+              --set-env-vars "ALLOWED_ORIGINS=$ALLOWED_ORIGINS" \
+              -o none
+          else
+            az containerapp update \
+              --name $CA_APP_EAST \
+              --resource-group "$RG" \
+              --image $ACR_NAME.azurecr.io/umich-salary-backend:latest \
+              -o none
           fi
-          az containerapp update \
-            --name $CA_APP_EAST \
-            --resource-group "$RG" \
-            --image $ACR_NAME.azurecr.io/umich-salary-backend:latest \
-            $EXTRA \
-            -o none
 
       - name: Update Container App (West)
         env:
           ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS }}
         run: |
           RG="${RESOURCE_GROUP:-rg-umich-salary}"
-          EXTRA=""
           if [ -n "$ALLOWED_ORIGINS" ]; then
-            EXTRA="--set-env-vars 'ALLOWED_ORIGINS=$ALLOWED_ORIGINS'"
+            az containerapp update \
+              --name $CA_APP_WEST \
+              --resource-group "$RG" \
+              --image $ACR_NAME.azurecr.io/umich-salary-backend:latest \
+              --set-env-vars "ALLOWED_ORIGINS=$ALLOWED_ORIGINS" \
+              -o none
+          else
+            az containerapp update \
+              --name $CA_APP_WEST \
+              --resource-group "$RG" \
+              --image $ACR_NAME.azurecr.io/umich-salary-backend:latest \
+              -o none
           fi
-          az containerapp update \
-            --name $CA_APP_WEST \
-            --resource-group "$RG" \
-            --image $ACR_NAME.azurecr.io/umich-salary-backend:latest \
-            $EXTRA \
-            -o none
