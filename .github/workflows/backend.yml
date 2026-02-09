@@ -7,6 +7,7 @@
 #   ACR_NAME             - Azure Container Registry name (e.g. umichsalaryf06715)
 #
 # Optional: RESOURCE_GROUP (default rg-umich-salary)
+# Optional: ALLOWED_ORIGINS - comma-separated origins for CORS (e.g. https://shray7.github.io). Unset = allow all.
 #
 # Azure OIDC setup (one-time): Create an App registration in Entra ID, add a
 # federated credential: issuer https://token.actions.githubusercontent.com,
@@ -95,19 +96,33 @@ jobs:
           docker push "$IMAGE"
 
       - name: Update Container App (East)
+        env:
+          ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS }}
         run: |
           RG="${RESOURCE_GROUP:-rg-umich-salary}"
+          EXTRA=""
+          if [ -n "$ALLOWED_ORIGINS" ]; then
+            EXTRA="--set-env-vars 'ALLOWED_ORIGINS=$ALLOWED_ORIGINS'"
+          fi
           az containerapp update \
             --name $CA_APP_EAST \
             --resource-group "$RG" \
             --image $ACR_NAME.azurecr.io/umich-salary-backend:latest \
+            $EXTRA \
             -o none
 
       - name: Update Container App (West)
+        env:
+          ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS }}
         run: |
           RG="${RESOURCE_GROUP:-rg-umich-salary}"
+          EXTRA=""
+          if [ -n "$ALLOWED_ORIGINS" ]; then
+            EXTRA="--set-env-vars 'ALLOWED_ORIGINS=$ALLOWED_ORIGINS'"
+          fi
           az containerapp update \
             --name $CA_APP_WEST \
             --resource-group "$RG" \
             --image $ACR_NAME.azurecr.io/umich-salary-backend:latest \
+            $EXTRA \
             -o none
