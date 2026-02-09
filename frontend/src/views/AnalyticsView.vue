@@ -63,6 +63,13 @@ async function loadYears() {
 }
 
 async function load() {
+  const cached = api.getAnalyticsCache(selectedYear.value)
+  if (cached) {
+    data.value = cached
+    loading.value = false
+    refetching.value = false
+    return
+  }
   const isInitialLoad = !data.value
   if (isInitialLoad) {
     loading.value = true
@@ -344,39 +351,39 @@ onBeforeUnmount(() => {
         <div class="charts-grid">
           <section v-if="data.histogram?.length" class="section chart-section">
             <h2 class="section-title">Salary distribution</h2>
-            <div class="chart-container">
+            <div class="chart-container" role="img" aria-label="Bar chart of salary distribution by range">
               <canvas id="chart-histogram"></canvas>
             </div>
           </section>
           <section v-if="data.topEarners?.length" class="section chart-section">
             <h2 class="section-title">Top 10 earners</h2>
-            <div class="chart-container chart-tall">
+            <div class="chart-container chart-tall" role="img" aria-label="Horizontal bar chart of top 10 earners and salary amounts">
               <canvas id="chart-top-earners"></canvas>
             </div>
           </section>
           <section v-if="data.departments?.length" class="section chart-section">
             <h2 class="section-title">Department payroll</h2>
-            <div class="chart-container chart-square">
+            <div class="chart-container chart-square" role="img" aria-label="Doughnut chart of department payroll share">
               <canvas id="chart-dept-pie"></canvas>
             </div>
           </section>
           <section v-if="data.campus?.length" class="section chart-section">
             <h2 class="section-title">Campus comparison</h2>
-            <div class="chart-container">
+            <div class="chart-container" role="img" aria-label="Bar chart comparing headcount and payroll by campus">
               <canvas id="chart-campus"></canvas>
             </div>
           </section>
           <section v-if="data.concentration?.length" class="section chart-section">
             <h2 class="section-title">Payroll concentration</h2>
             <p class="chart-desc">Cumulative % of total payroll earned by lowest-paid X% of employees.</p>
-            <div class="chart-container">
+            <div class="chart-container" role="img" aria-label="Line chart of cumulative payroll percentage by employee percentile">
               <canvas id="chart-concentration"></canvas>
             </div>
           </section>
           <section v-if="data.professorSalaries?.length" class="section chart-section">
             <h2 class="section-title">Professor salaries by department</h2>
             <p class="chart-desc">Avg salary for professors in top departments (by total payroll).</p>
-            <div class="chart-container chart-tall">
+            <div class="chart-container chart-tall" role="img" aria-label="Horizontal bar chart of average professor salary by department">
               <canvas id="chart-professor-salaries"></canvas>
             </div>
           </section>

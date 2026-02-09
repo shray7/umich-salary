@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
+import { preloadAnalyticsRoute } from '@/router'
+import { api } from '@/api/client'
 
 const route = useRoute()
 const dark = ref(false)
 const menuOpen = ref(false)
+const menuToggleRef = ref<HTMLButtonElement | null>(null)
+const navRef = ref<HTMLElement | null>(null)
 
 function toggleTheme() {
   dark.value = !dark.value
@@ -23,6 +27,11 @@ function closeMenu() {
   menuOpen.value = false
 }
 
+function onAnalyticsNavHover() {
+  preloadAnalyticsRoute()
+  api.prefetchAnalytics(0)
+}
+
 onMounted(() => {
   const saved = localStorage.getItem('um-salary-theme')
   dark.value = saved === 'dark'
@@ -30,33 +39,52 @@ onMounted(() => {
 })
 
 watch(() => route.path, closeMenu)
+
+watch(menuOpen, async (open) => {
+  await nextTick()
+  if (open && navRef.value) {
+    const firstLink = navRef.value.querySelector<HTMLAnchorElement>('a')
+    firstLink?.focus()
+  } else {
+    menuToggleRef.value?.focus()
+  }
+})
 </script>
 
 <template>
   <div class="layout" :class="{ 'nav-open': menuOpen }">
+    <a href="#main" class="skip-link">Skip to main content</a>
     <header class="header">
       <RouterLink to="/" class="logo" @click="closeMenu">UM Salary</RouterLink>
       <button
+        ref="menuToggleRef"
         type="button"
         class="menu-toggle"
-        aria-label="Toggle menu"
+        aria-label="Toggle navigation menu"
         :aria-expanded="menuOpen"
         @click="toggleMenu"
       >
         <span class="menu-toggle-icon" aria-hidden="true"></span>
       </button>
-      <nav class="nav">
+      <nav ref="navRef" class="nav" aria-label="Main navigation">
         <RouterLink to="/" @click="closeMenu">Search</RouterLink>
-        <RouterLink to="/analytics" @click="closeMenu">Analytics</RouterLink>
+        <RouterLink
+          to="/analytics"
+          @click="closeMenu"
+          @mouseenter="onAnalyticsNavHover"
+          @focus="onAnalyticsNavHover"
+        >
+          Analytics
+        </RouterLink>
         <RouterLink to="/departments" @click="closeMenu">Departments</RouterLink>
         <RouterLink to="/titles" @click="closeMenu">Titles</RouterLink>
-        <button type="button" class="theme-toggle" :aria-label="dark ? 'Switch to light' : 'Switch to dark'" @click="toggleTheme">
+        <button type="button" class="theme-toggle" :aria-label="dark ? 'Switch to light mode' : 'Switch to dark mode'" @click="toggleTheme">
           {{ dark ? '☀️' : '🌙' }}
         </button>
       </nav>
     </header>
     <div class="header-stripe" aria-hidden="true" />
-    <main class="main">
+    <main id="main" class="main" tabindex="-1">
       <slot />
     </main>
   </div>
@@ -64,10 +92,30 @@ watch(() => route.path, closeMenu)
 
 <style scoped>
 /* ========== Base (desktop) ========== */
+.skip-link {
+  position: absolute;
+  top: -3rem;
+  left: 0.75rem;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+  background: var(--color-accent);
+  color: #fff;
+  font-weight: 600;
+  border-radius: var(--radius);
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0.75rem;
+  outline: 2px solid var(--color-header-accent);
+  outline-offset: 2px;
+}
+
 .layout {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .header {

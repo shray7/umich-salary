@@ -140,6 +140,8 @@ async function get<T>(path: string, params?: Record<string, string | number>): P
   return res.json()
 }
 
+let analyticsCache: { yearKey: number; data: AnalyticsResponse } | null = null
+
 export const api = {
   getYears: () => get<YearOption[]>('/api/years'),
   getCampuses: () => get<CampusOption[]>('/api/campuses'),
@@ -153,8 +155,20 @@ export const api = {
     get<PaginatedResponse>('/api/search/department', { department, year, page, pageSize }),
   getPerson: (lastName: string, firstName: string) =>
     get<PersonResponse>('/api/person', { lastName, firstName }),
-  getAnalytics: (year?: number) =>
-    get<AnalyticsResponse>('/api/analytics', year !== undefined ? { year } : {}),
+  getAnalytics: async (year: number = 0): Promise<AnalyticsResponse> => {
+    if (analyticsCache?.yearKey === year) return analyticsCache.data
+    const data = await get<AnalyticsResponse>('/api/analytics', { year })
+    analyticsCache = { yearKey: year, data }
+    return data
+  },
+  prefetchAnalytics: (year: number = 0) => {
+    if (analyticsCache?.yearKey === year) return
+    get<AnalyticsResponse>('/api/analytics', { year }).then((data) => {
+      analyticsCache = { yearKey: year, data }
+    })
+  },
+  getAnalyticsCache: (year: number): AnalyticsResponse | null =>
+    analyticsCache?.yearKey === year ? analyticsCache.data : null,
 }
 
 export function formatCurrency(n: number): string {

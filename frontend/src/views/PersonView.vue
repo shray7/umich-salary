@@ -127,8 +127,8 @@ const chartData = computed(() => {
         <!-- Salary trend chart -->
         <section v-if="chartData && chartData.points.length > 0" class="chart-section">
           <h3 class="chart-title">Salary over time</h3>
-          <div class="chart-wrap">
-            <svg :viewBox="`0 0 ${chartData.w} ${chartData.h}`" class="chart-svg" preserveAspectRatio="xMidYMid meet">
+          <div class="chart-wrap" role="img" aria-label="Line chart of salary over time by fiscal year">
+            <svg :viewBox="`0 0 ${chartData.w} ${chartData.h}`" class="chart-svg" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
               <defs>
                 <linearGradient id="salary-area" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stop-color="var(--color-highlight)" stop-opacity="0.3" />
