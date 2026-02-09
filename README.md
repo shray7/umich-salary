@@ -150,6 +150,8 @@ The API is rate-limited by IP (default: 100 requests per 15 minutes). Configure 
 
 To run PostgreSQL and the backend container in Azure, see [docs/DEPLOY-AZURE.md](docs/DEPLOY-AZURE.md) (Azure Database for PostgreSQL + Azure Container Apps or App Service). For production, you can deploy the backend to two regions (e.g. West US and East US) with Azure Front Door for latency-based routing; the deploy doc includes a multi-region section.
 
+The **frontend** is deployed to [GitHub Pages](https://shray7.github.io/umich-salary/) on every push to `main` (see `.github/workflows/frontend.yml`). Set the `VITE_API_URL` repository secret to your production API base URL so the built app talks to your backend.
+
 ## Project layout
 
 ```
