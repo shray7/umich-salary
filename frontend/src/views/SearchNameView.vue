@@ -67,15 +67,15 @@ watch(() => route.query, load)
           </thead>
           <tbody>
             <tr v-for="r in items" :key="r.id">
-              <td>
+              <td data-label="Name">
                 <button type="button" class="link-btn" @click="goPerson(r)">
                   {{ r.lastName }}, {{ r.firstName }}
                 </button>
               </td>
-              <td>{{ r.title }}</td>
-              <td>{{ r.department }}</td>
-              <td class="num">{{ formatCurrency(r.ftr) }}</td>
-              <td class="num">{{ formatCurrency(r.gf) }}</td>
+              <td data-label="Title">{{ r.title }}</td>
+              <td data-label="Department">{{ r.department }}</td>
+              <td class="num" data-label="FTR">{{ formatCurrency(r.ftr) }}</td>
+              <td class="num" data-label="GF">{{ formatCurrency(r.gf) }}</td>
             </tr>
           </tbody>
         </table>
@@ -85,6 +85,7 @@ watch(() => route.query, load)
 </template>
 
 <style scoped>
+/* ========== Base (desktop) ========== */
 .view {
   width: 100%;
 }

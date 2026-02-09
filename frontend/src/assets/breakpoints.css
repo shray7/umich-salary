@@ -1,0 +1,12 @@
+/**
+ * Breakpoint constants for responsive layout.
+ * Use these pixel values in media queries (CSS does not support var() in @media).
+ *
+ * Copy-paste for media queries:
+ *   (max-width: 640px)  = mobile
+ *   (max-width: 1024px) = tablet
+ */
+:root {
+  --bp-mobile: 640px;
+  --bp-tablet: 1024px;
+}

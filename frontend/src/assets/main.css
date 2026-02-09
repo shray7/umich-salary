@@ -1,3 +1,6 @@
+@import './breakpoints.css';
+
+/* ========== Base (desktop) ========== */
 /* Navy blue palette */
 :root {
   --color-bg: #f8fafc;
@@ -148,11 +151,121 @@ button:focus-visible {
   text-decoration: underline;
 }
 
-/* Responsive table: allow horizontal scroll on small screens */
+/* ========== Tablet (max-width: 1024px) ========== */
+@media (max-width: 1024px) {
+  /* Global tablet overrides (none required by default) */
+}
+
+/* ========== Mobile (max-width: 640px) ========== */
 @media (max-width: 640px) {
   .table-wrap {
-    margin-left: -1rem;
-    margin-right: -1rem;
-    border-radius: 0;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Card-style table: one row per record, label-value pairs via data-label */
+  .table-wrap .data-table {
+    display: block;
+  }
+
+  .table-wrap .data-table thead {
+    display: none;
+  }
+
+  .table-wrap .data-table tbody tr {
+    display: block;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 0 0.75rem;
+    margin-bottom: 0.75rem;
+    background: var(--color-surface);
+    transition: box-shadow 0.15s ease;
+  }
+
+  .table-wrap .data-table tbody tr:hover {
+    box-shadow: var(--shadow-sm);
+  }
+
+  .table-wrap .data-table tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .table-wrap .data-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    min-height: 2.25rem;
+  }
+
+  .table-wrap .data-table tbody td:last-child {
+    border-bottom: none;
+  }
+
+  .table-wrap .data-table tbody tr td:first-child {
+    padding-top: 0.75rem;
+  }
+
+  .table-wrap .data-table tbody tr td:last-child {
+    padding-bottom: 0.75rem;
+  }
+
+  /* Rank badge: show number prominently at top of each card */
+  .table-wrap .data-table tbody td.rank-cell {
+    justify-content: center;
+    border-bottom: 1px solid var(--color-border);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .table-wrap .data-table tbody td.rank-cell::before {
+    display: none;
+  }
+
+  .table-wrap .data-table tbody td .rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.75rem;
+    height: 1.75rem;
+    padding: 0 0.35rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--color-surface);
+    background: var(--color-accent);
+    border-radius: 50%;
+  }
+
+  .table-wrap .data-table tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    min-width: 6.5rem;
+  }
+
+  .table-wrap .data-table tbody td.num {
+    text-align: right;
+  }
+
+  .table-wrap .data-table tbody td.num::before {
+    margin-right: auto;
+  }
+
+  .table-wrap .data-table tbody td .link-btn {
+    min-width: 0;
+    text-align: right;
+    word-break: break-word;
+  }
+
+  .table-wrap .data-table tbody td:not(.num) .link-btn {
+    text-align: left;
   }
 }

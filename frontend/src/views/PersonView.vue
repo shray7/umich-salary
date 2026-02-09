@@ -179,14 +179,14 @@ const chartData = computed(() => {
             </thead>
             <tbody>
               <tr v-for="item in historyWithChange" :key="item.record.id">
-                <td>{{ item.record.fiscalYear }}</td>
-                <td>{{ item.record.campus || '—' }}</td>
-                <td>{{ item.record.title }}</td>
-                <td>{{ item.record.department }}</td>
-                <td>{{ item.record.periodFte || '—' }}</td>
-                <td class="num">{{ formatCurrency(item.record.gf) }}</td>
-                <td class="num">{{ formatCurrency(item.record.ftr) }}</td>
-                <td class="num">
+                <td data-label="Fiscal year">{{ item.record.fiscalYear }}</td>
+                <td data-label="Campus">{{ item.record.campus || '—' }}</td>
+                <td data-label="Title">{{ item.record.title }}</td>
+                <td data-label="Department">{{ item.record.department }}</td>
+                <td data-label="Period / FTE">{{ item.record.periodFte || '—' }}</td>
+                <td class="num" data-label="GF">{{ formatCurrency(item.record.gf) }}</td>
+                <td class="num" data-label="FTR">{{ formatCurrency(item.record.ftr) }}</td>
+                <td class="num" data-label="% change">
                   <span v-if="item.changePct != null" :class="{
                     'pct-positive': item.changePct > 0,
                     'pct-negative': item.changePct < 0
@@ -205,6 +205,7 @@ const chartData = computed(() => {
 </template>
 
 <style scoped>
+/* ========== Base (desktop) ========== */
 .view {
   width: 100%;
 }
@@ -344,4 +345,20 @@ const chartData = computed(() => {
 
 .pct-positive { color: #0d7d3d; font-weight: 600; }
 .pct-negative { color: #c92a2a; font-weight: 600; }
+
+/* ========== Tablet (max-width: 1024px) ========== */
+@media (max-width: 1024px) {
+  /* No overrides needed */
+}
+
+/* ========== Mobile (max-width: 640px) ========== */
+@media (max-width: 640px) {
+  .stats-section {
+    flex-direction: column;
+  }
+
+  .stat-card {
+    min-width: 100%;
+  }
+}
 </style>

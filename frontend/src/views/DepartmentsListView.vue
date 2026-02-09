@@ -110,6 +110,7 @@ onBeforeUnmount(() => observer.disconnect())
 </template>
 
 <style scoped>
+/* ========== Base (desktop) ========== */
 .view {
   width: 100%;
 }
@@ -203,5 +204,35 @@ onBeforeUnmount(() => observer.disconnect())
 .count {
   padding: 0.5rem 0;
   font-size: 0.875rem;
+}
+
+/* ========== Tablet (max-width: 1024px) ========== */
+@media (max-width: 1024px) {
+  /* No overrides needed */
+}
+
+/* ========== Mobile (max-width: 640px) ========== */
+@media (max-width: 640px) {
+  .toolbar {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .toolbar label {
+    width: 100%;
+  }
+
+  .toolbar select,
+  .toolbar input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.5rem 0.75rem;
+    min-height: 44px;
+  }
+
+  .list-btn {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+  }
 }
 </style>

@@ -423,6 +423,7 @@ onBeforeUnmount(() => {
             <table class="data-table">
               <thead>
                 <tr>
+                  <th class="num">Rank</th>
                   <th>Name</th>
                   <th>Title</th>
                   <th>Department</th>
@@ -430,15 +431,18 @@ onBeforeUnmount(() => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="r in data.topEarners" :key="r.id">
-                  <td>
+                <tr v-for="(r, i) in data.topEarners" :key="r.id">
+                  <td class="num rank-cell" data-label="Rank">
+                    <span class="rank-badge">{{ i + 1 }}</span>
+                  </td>
+                  <td data-label="Name">
                     <button type="button" class="link-btn" @click="goPerson(r)">
                       {{ r.lastName }}, {{ r.firstName }}
                     </button>
                   </td>
-                  <td>{{ r.title }}</td>
-                  <td>{{ r.department }}</td>
-                  <td class="num">{{ formatCurrency(r.ftr) }}</td>
+                  <td data-label="Title">{{ r.title }}</td>
+                  <td data-label="Department">{{ r.department }}</td>
+                  <td class="num" data-label="FTR">{{ formatCurrency(r.ftr) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -451,6 +455,7 @@ onBeforeUnmount(() => {
             <table class="data-table">
               <thead>
                 <tr>
+                  <th class="num">Rank</th>
                   <th>Department</th>
                   <th class="num">Headcount</th>
                   <th class="num">Total payroll</th>
@@ -458,15 +463,18 @@ onBeforeUnmount(() => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="d in data.departments" :key="d.name">
-                  <td>
+                <tr v-for="(d, i) in data.departments" :key="d.name">
+                  <td class="num rank-cell" data-label="Rank">
+                    <span class="rank-badge">{{ i + 1 }}</span>
+                  </td>
+                  <td data-label="Department">
                     <button type="button" class="link-btn" @click="goDepartment(d.name)">
                       {{ d.name }}
                     </button>
                   </td>
-                  <td class="num">{{ d.count.toLocaleString() }}</td>
-                  <td class="num">{{ formatCurrency(d.totalFtr) }}</td>
-                  <td class="num">{{ formatCurrency(d.avgFtr) }}</td>
+                  <td class="num" data-label="Headcount">{{ d.count.toLocaleString() }}</td>
+                  <td class="num" data-label="Total payroll">{{ formatCurrency(d.totalFtr) }}</td>
+                  <td class="num" data-label="Avg salary">{{ formatCurrency(d.avgFtr) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -494,6 +502,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+/* ========== Base (desktop) ========== */
 .view {
   width: 100%;
 }
@@ -890,5 +899,37 @@ onBeforeUnmount(() => {
   background: var(--color-bg);
   color: var(--color-text-muted);
   font-weight: 400;
+}
+
+/* ========== Tablet (max-width: 1024px) ========== */
+@media (max-width: 1024px) {
+  /* Keep 2-column charts grid; no overrides needed */
+}
+
+/* ========== Mobile (max-width: 640px) ========== */
+@media (max-width: 640px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .cards {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+
+  .section {
+    margin-bottom: 1.5rem;
+  }
+
+  .heatmap-wrap {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .heatmap th,
+  .heatmap td {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.85rem;
+  }
 }
 </style>

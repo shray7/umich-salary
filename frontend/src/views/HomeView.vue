@@ -236,6 +236,7 @@ function submitDepartment() {
 </template>
 
 <style scoped>
+/* ========== Base (desktop) ========== */
 .home {
   max-width: 640px;
   margin: 0 auto;
@@ -540,5 +541,33 @@ function submitDepartment() {
 .links a:hover {
   background: var(--color-highlight-muted);
   color: var(--color-accent);
+}
+
+/* ========== Tablet (max-width: 1024px) ========== */
+@media (max-width: 1024px) {
+  /* No overrides needed */
+}
+
+/* ========== Mobile (max-width: 640px) ========== */
+@media (max-width: 640px) {
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .tabs {
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+  }
+
+  .tab {
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.9rem;
+  }
 }
 </style>
