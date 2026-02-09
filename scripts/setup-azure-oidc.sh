@@ -48,7 +48,7 @@ echo "App ID: $APP_ID"
 echo "=== Adding federated credential for GitHub (main branch) ==="
 az ad app federated-credential create \
   --id "$APP_ID" \
-  --parameters "{\"name\":\"main\",\"issuer\":\"https://token.actions.githubusercontent.com/\",\"subject\":\"repo:${GITHUB_REPO}:ref:refs/heads/main\",\"audiences\":[\"api://AzureADTokenExchange\"]}" \
+  --parameters "{\"name\":\"main\",\"issuer\":\"https://token.actions.githubusercontent.com\",\"subject\":\"repo:${GITHUB_REPO}:ref:refs/heads/main\",\"audiences\":[\"api://AzureADTokenExchange\"]}" \
   -o none
 
 echo "=== Creating service principal ==="
