@@ -1,18 +1,20 @@
 import pool from '../db/pool.js';
 
 const YEAR_LABELS = [
-  '2025-2026', '2024-2025', '2023-2024', '2022-2023', '2021-2022',
-  '2020-2021', '2019-2020', '2018-2019', '2017-2018', '2016-2017',
-  '2015-2016', '2014-2015', '2013-2014', '2012-2013', '2011-2012',
-  '2010-2011', '2009-2010', '2008-2009', '2007-2008', '2006-2007',
-  '2005-2006', '2004-2005', '2003-2004', '2002-2003',
+  '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017',
+  '2016', '2015', '2014', '2013', '2012', '2011', '2010', '2009', '2008',
+  '2007', '2006', '2005', '2004', '2003', '2002',
 ];
+
+// Only expose 2025 for now (year_key 0)
+const CURRENT_YEAR_KEY = 0;
 
 export async function getYears(_req, res) {
   const client = await pool.connect();
   try {
     const { rows } = await client.query(
-      `SELECT DISTINCT year_key, fiscal_year FROM salary_records ORDER BY year_key ASC`
+      `SELECT DISTINCT year_key, fiscal_year FROM salary_records WHERE year_key = $1 ORDER BY year_key ASC`,
+      [CURRENT_YEAR_KEY]
     );
     const years = rows.map((r) => ({
       yearKey: r.year_key,

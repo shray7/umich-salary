@@ -44,7 +44,7 @@ async function load() {
 
 const yearLabel = computed(() => {
   const y = Number(route.query.year) || 0
-  const labels = ['2025-2026', '2024-2025', '2023-2024']
+  const labels = ['2025', '2024', '2023']
   return labels[y] || `${y}`
 })
 

@@ -1,22 +1,21 @@
 /**
  * Delete all salary records for a given year.
  * Usage: node src/scripts/delete-year.js [yearKey]
- *   yearKey: 4 = 2021-2022, 3 = 2022-2023, etc.
+ *   yearKey: 4 = 2021, 3 = 2022, etc.
  */
 
 import 'dotenv/config';
 import pool from '../db/pool.js';
 
 const YEAR_LABELS = [
-  '2025-2026', '2024-2025', '2023-2024', '2022-2023', '2021-2022',
-  '2020-2021', '2019-2020', '2018-2019', '2017-2018', '2016-2017',
-  '2015-2016', '2014-2015', '2013-2014', '2012-2013', '2011-2012',
+  '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017',
+  '2016', '2015', '2014', '2013', '2012', '2011',
 ];
 
 const yearKey = parseInt(process.argv[2], 10);
 if (Number.isNaN(yearKey) || yearKey < 0) {
   console.error('Usage: node delete-year.js <yearKey>');
-  console.error('  yearKey 4 = 2021-2022');
+  console.error('  yearKey 4 = 2021');
   process.exitCode = 1;
   process.exit(1);
 }
