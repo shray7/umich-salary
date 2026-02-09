@@ -8,6 +8,7 @@
     "dev": "node --watch src/index.js",
     "db:init": "node src/db/init.js",
     "db:seed": "node src/db/seed.js",
+    "db:check": "node src/scripts/check-db-records.js",
     "import": "node src/scripts/import-from-umsalary.js",
     "import:pdf": "node src/scripts/import-from-pdf.js",
     "import:pdf:all": "node src/scripts/import-from-pdf-all.js",

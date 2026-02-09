@@ -16,6 +16,9 @@ import { getAnalytics } from './routes/analytics.js';
 
 const app = express();
 
+// Required when behind a proxy (Azure Front Door, load balancer) so rate limiting uses client IP
+app.set('trust proxy', 1);
+
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000;
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX) || 100;
 
@@ -29,6 +32,8 @@ const apiLimiter = rateLimit({
 
 app.use(cors());
 app.use(express.json());
+// Health before rate limiter so probes and checks don't consume the limit
+app.get('/api/health', (_req, res) => res.json({ ok: true }));
 app.use('/api', apiLimiter);
 
 app.get('/api/years', getYears);
@@ -40,8 +45,6 @@ app.get('/api/search/title', searchByTitle);
 app.get('/api/search/department', searchByDepartment);
 app.get('/api/person', getPerson);
 app.get('/api/analytics', getAnalytics);
-
-app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

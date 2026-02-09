@@ -1,0 +1,113 @@
+# Backend: CI on every push/PR; deploy to Azure Container Apps on push to main.
+#
+# Required GitHub secrets (Settings → Secrets and variables → Actions):
+#   AZURE_CLIENT_ID      - App (client) ID of the Azure AD app used for OIDC
+#   AZURE_TENANT_ID      - Directory (tenant) ID
+#   AZURE_SUBSCRIPTION_ID - Azure subscription ID
+#   ACR_NAME             - Azure Container Registry name (e.g. umichsalaryf06715)
+#
+# Optional: RESOURCE_GROUP (default rg-umich-salary)
+#
+# Azure OIDC setup (one-time): Create an App registration in Entra ID, add a
+# federated credential: issuer https://token.actions.githubusercontent.com,
+# subject repo:<owner>/<repo>:ref:refs/heads/main. Grant the app's service principal:
+#   - AcrPush on the ACR
+#   - Contributor on the resource group (or Container Apps)
+# See: https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-azure
+
+name: Backend
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start server and check health
+        run: |
+          npm run start &
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:3000/api/health | grep -q '"ok":true' && exit 0
+            sleep 1
+          done
+          echo 'Health check timed out' && exit 1
+
+  deploy:
+    needs: ci
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      ACR_NAME: ${{ secrets.ACR_NAME }}
+      RESOURCE_GROUP: ${{ secrets.RESOURCE_GROUP }}
+      CA_APP_EAST: ca-umich-salary-api-east
+      CA_APP_WEST: ca-umich-salary-api-west
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Azure CLI
+        uses: azure/setup-az-cli@v1
+        with:
+          version: 2.68.0
+
+      - name: Log in to ACR
+        run: az acr login --name $ACR_NAME
+
+      - name: Build and push backend image
+        run: |
+          IMAGE="$ACR_NAME.azurecr.io/umich-salary-backend:latest"
+          docker build --platform linux/amd64 -t "$IMAGE" ./backend
+          docker push "$IMAGE"
+
+      - name: Update Container App (East)
+        run: |
+          RG="${RESOURCE_GROUP:-rg-umich-salary}"
+          az containerapp update \
+            --name $CA_APP_EAST \
+            --resource-group "$RG" \
+            --image $ACR_NAME.azurecr.io/umich-salary-backend:latest \
+            -o none
+
+      - name: Update Container App (West)
+        run: |
+          RG="${RESOURCE_GROUP:-rg-umich-salary}"
+          az containerapp update \
+            --name $CA_APP_WEST \
+            --resource-group "$RG" \
+            --image $ACR_NAME.azurecr.io/umich-salary-backend:latest \
+            -o none

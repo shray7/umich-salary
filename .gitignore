@@ -6,6 +6,8 @@ node_modules/
 .env.local
 .env.*.local
 !.env.example
+deploy-azure.env
+scripts/deploy-azure.env
 
 # Build outputs
 dist/

@@ -146,6 +146,10 @@ Full import (all departments, one year) can take a long time; use a delay of at 
 
 The API is rate-limited by IP (default: 100 requests per 15 minutes). Configure with `RATE_LIMIT_MAX` and `RATE_LIMIT_WINDOW_MS` in `backend/.env`.
 
+## Deploy to Azure
+
+To run PostgreSQL and the backend container in Azure, see [docs/DEPLOY-AZURE.md](docs/DEPLOY-AZURE.md) (Azure Database for PostgreSQL + Azure Container Apps or App Service). For production, you can deploy the backend to two regions (e.g. West US and East US) with Azure Front Door for latency-based routing; the deploy doc includes a multi-region section.
+
 ## Project layout
 
 ```
