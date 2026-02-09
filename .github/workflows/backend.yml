@@ -80,10 +80,10 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Azure CLI
-        uses: azure/setup-az-cli@v1
-        with:
-          version: 2.68.0
+      - name: Install Azure CLI
+        run: |
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+          az version
 
       - name: Log in to ACR
         run: az acr login --name $ACR_NAME
